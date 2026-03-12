@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: wealth-api-demo
+    env: docker
+    plan: free
+    autoDeploy: true
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:+UseContainerSupport

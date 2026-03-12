@@ -1,0 +1,210 @@
+# Wealth API Demo (Interview Ready)
+
+A Java Spring Boot REST API project with banking and wealth management use cases.
+
+## Why this project is useful for interviews
+
+This project demonstrates critical API engineering patterns used in fintech systems:
+- Layered architecture: `controller -> service -> repository`
+- Input validation and error contracts
+- Idempotent transfers (`clientRequestId`) for payment safety
+- Transaction history for auditability
+- Portfolio rebalancing logic by risk profile
+- Automated tests in both JUnit and TestNG
+- Jenkins CI pipeline for build + test execution
+
+## Tech stack
+
+- Java 17
+- Spring Boot 3
+- Spring Web + Validation + Data JPA
+- H2 in-memory DB
+- OpenAPI/Swagger UI
+- JUnit 5 + Spring MockMvc integration tests
+- TestNG sample test
+- Jenkins Pipeline
+
+## API use cases implemented
+
+1. Customer onboarding
+2. Account opening with opening balance
+3. Cash deposit into account
+4. Fund transfer with idempotency key
+5. Account statement by time window
+6. Portfolio holdings update
+7. Rebalance preview based on risk profile
+
+## Run locally
+
+```bash
+mvn clean test
+mvn spring-boot:run
+```
+
+Open:
+- API docs: `http://localhost:8080/swagger-ui.html`
+- H2 console: `http://localhost:8080/h2-console`
+
+## Key endpoints
+
+### Customer onboarding
+`POST /api/v1/customers`
+
+```json
+{
+  "fullName": "Asha Verma",
+  "email": "asha.verma@example.com",
+  "riskProfile": "BALANCED"
+}
+```
+
+### Open account
+`POST /api/v1/accounts`
+
+```json
+{
+  "customerId": "<UUID>",
+  "currency": "USD",
+  "openingBalance": 1000.00
+}
+```
+
+### Deposit
+`POST /api/v1/accounts/{accountId}/deposit`
+
+```json
+{
+  "amount": 100.00,
+  "reason": "Monthly savings"
+}
+```
+
+### Transfer (idempotent)
+`POST /api/v1/accounts/transfer`
+
+```json
+{
+  "sourceAccountId": "<UUID>",
+  "destinationAccountId": "<UUID>",
+  "amount": 250.00,
+  "clientRequestId": "trf-2026-0001"
+}
+```
+
+### Statement
+`GET /api/v1/accounts/{accountId}/statement?from=2026-03-01T00:00:00Z&to=2026-03-31T23:59:59Z`
+
+### Portfolio holding
+`POST /api/v1/portfolios/{customerId}/holdings`
+
+```json
+{
+  "symbol": "EQUITY",
+  "marketValue": 12000.50
+}
+```
+
+### Rebalance preview
+`POST /api/v1/portfolios/{customerId}/rebalance-preview`
+
+## Testing strategy
+
+- `AccountApiIntegrationTest`: end-to-end API flow for customer/account/transfer/statement
+- `PortfolioServiceTestNg`: TestNG example for domain logic
+- `WealthApiApplicationTests`: context boot sanity check
+
+Run all tests:
+
+```bash
+mvn test
+```
+
+## Jenkins CI/CD setup
+
+1. Install Jenkins with JDK 17 and Maven 3 tools configured as:
+  - `jdk17`
+   - `maven3`
+2. Create Pipeline job and point to this repo.
+3. Jenkins reads `Jenkinsfile` and runs build + tests automatically.
+4. Collect JUnit reports and archive JAR.
+
+## Suggested open-source/cloud options for demo hosting
+
+- **Render**: easy container deploy from GitHub
+- **Railway**: fast Java app deployment for demos
+- **Fly.io**: lightweight global app hosting
+- **GitHub Actions + Docker Hub + Render/Fly**: good CI/CD story for interviews
+- **Local Kubernetes with kind + Argo CD** (advanced demo)
+
+## Host with GitHub Actions + Docker Hub + Render/Fly
+
+This repository now includes:
+
+- GitHub Actions CI for tests: `.github/workflows/ci.yml`
+- GitHub Actions Docker publish/deploy pipeline: `.github/workflows/docker-deploy.yml`
+- Render service blueprint: `render.yaml`
+- Fly app config: `fly.toml`
+
+### 1) Create required accounts
+
+- GitHub
+- Docker Hub
+- Render and/or Fly.io
+
+### 2) Configure GitHub repository secrets
+
+In GitHub repo settings -> Secrets and variables -> Actions, add:
+
+- `DOCKERHUB_USERNAME`: your Docker Hub username
+- `DOCKERHUB_TOKEN`: Docker Hub access token (not password)
+- `RENDER_DEPLOY_HOOK_URL`: optional Render deploy hook URL
+- `FLY_API_TOKEN`: optional Fly personal access token
+
+### 3) Docker image publish flow
+
+On every push to `main` or `master`, workflow `docker-deploy.yml`:
+
+1. Builds Docker image from `Dockerfile`
+2. Pushes to `docker.io/<DOCKERHUB_USERNAME>/wealth-api-demo`
+3. Tags image with branch/sha/latest (default branch)
+
+### 4) Deploy to Render
+
+Option A (recommended for demo):
+
+1. In Render, create a new Web Service from Docker image.
+2. Use image: `docker.io/<DOCKERHUB_USERNAME>/wealth-api-demo:latest`.
+3. Add deploy hook URL into `RENDER_DEPLOY_HOOK_URL` secret.
+4. Every successful Docker publish triggers Render deployment.
+
+Option B:
+
+1. Connect the repo directly in Render.
+2. Render can also read `render.yaml` blueprint.
+
+### 5) Deploy to Fly.io
+
+1. Install and login once locally:
+
+```bash
+brew install flyctl
+fly auth login
+```
+
+2. Create your Fly app name (must be globally unique), then update `fly.toml` `app` value.
+3. Set `FLY_API_TOKEN` in GitHub secrets.
+4. GitHub Actions auto-runs `flyctl deploy --remote-only` after Docker publish.
+
+### 6) Verify hosted API
+
+- Render URL example: `https://<your-render-service>.onrender.com/swagger-ui.html`
+- Fly URL example: `https://<your-fly-app>.fly.dev/swagger-ui.html`
+
+Use these links in interview demos to show cloud-hosted APIs and CI/CD automation.
+
+## Interview talking points
+
+- Explain why idempotency is mandatory for transfer APIs.
+- Describe how API tests protect against regressions in payment flows.
+- Show CI pipeline quality gates for every pull request.
+- Discuss next steps for production: auth (OAuth2), rate limiting, observability, and fraud checks.
