@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="REST API Demo Test Suite" verbose="2">
+
+    <test name="GET Request Tests">
+        <classes>
+            <class name="com.restapi.demo.tests.GetRequestTest"/>
+        </classes>
+    </test>
+
+    <test name="POST Request Tests">
+        <classes>
+            <class name="com.restapi.demo.tests.PostRequestTest"/>
+        </classes>
+    </test>
+
+    <test name="PUT Request Tests">
+        <classes>
+            <class name="com.restapi.demo.tests.PutRequestTest"/>
+        </classes>
+    </test>
+
+    <test name="DELETE Request Tests">
+        <classes>
+            <class name="com.restapi.demo.tests.DeleteRequestTest"/>
+        </classes>
+    </test>
+
+</suite>
